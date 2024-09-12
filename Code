@@ -1,0 +1,60 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+import matplotlib.pyplot as plt
+
+# Load patient data (example CSV file)
+# Data should include features like age, blood pressure, etc., and a target column 'condition'
+data = pd.read_csv('patient_data.csv')
+
+# Prepare data
+X = data.drop('condition', axis=1)  # Features
+y = data['condition']  # Target variable
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Train a model for diagnostics (e.g., Random Forest Classifier)
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Predict and evaluate the model
+y_pred = model.predict(X_test)
+print("Model Accuracy:", accuracy_score(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+
+# Predictive Analytics: Example of predicting a future condition
+# For simplicity, using the same model
+future_patient_data = pd.DataFrame({
+    'age': [45],
+    'blood_pressure': [120],
+    # Add other features as needed
+})
+future_prediction = model.predict(future_patient_data)
+print("Future Patient Condition Prediction:", future_prediction)
+
+# Personalized Treatment Recommendations (simplified example)
+def recommend_treatment(prediction):
+    if prediction == 'Condition A':
+        return "Recommended treatment for Condition A"
+    elif prediction == 'Condition B':
+        return "Recommended treatment for Condition B"
+    else:
+        return "Consult a specialist for further treatment"
+
+recommendation = recommend_treatment(future_prediction[0])
+print("Treatment Recommendation:", recommendation)
+
+# Visualization of feature importance (for diagnostics model)
+importances = model.feature_importances_
+features = X.columns
+indices = importances.argsort()[::-1]
+
+plt.figure()
+plt.title('Feature Importances')
+plt.bar(range(X.shape[1]), importances[indices], align='center')
+plt.xticks(range(X.shape[1]), features[indices], rotation=90)
+plt.xlim([-1, X.shape[1]])
+plt.show()
